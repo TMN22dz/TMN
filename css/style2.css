@@ -1,0 +1,39 @@
+*{
+    box-sizing: border-box;
+}
+.sectinf1{
+    height: auto;
+    width: 100%;
+  }
+.inf-exam {
+    padding-top: 20px;
+    padding-right: 30px;
+  }
+  .inf-exam h1{
+    color: rgb(3, 3, 37);
+  }
+.inf-exam ol{
+    padding-right: 20px;
+    font-size: 20px;
+    color: rgb(12, 12, 97);
+    padding-bottom: 5px;
+   }
+.inf-exam ul{
+    list-style: none;
+}
+.inf-exam ul li{
+    display: flex;
+}
+.inf-exam h3{
+    padding-bottom: 5px;
+    color: rgb(133, 11, 11);
+  }
+  .boncourage{
+    text-align: center;
+    padding-bottom: 10px;
+  }
+.salle{
+    width: 25px;
+    height: 25px;
+    margin-left: 10px;
+}
