@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مترجم الكتابة العرقمسية</title>
+    <style>
+        @font-face {
+            font-family: 'MaPoliceMasquee';
+            src: url('arablatin.ttf'); 
+            font-weight: normal;
+            font-style: normal;
+        }
+        :root {
+            --primary: #2563eb; 
+            --primary-hover: #1d4ed8;
+            --bg: #0f172a; 
+            --card-bg: #1e293b; 
+            --text-main: #1e293b; 
+            --text-label: #f8fafc; 
+            --text-muted: #94a3b8; 
+            --border: #cbd5e1; 
+            --input-bg: #f0f7ff; 
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-label);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 850px;
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+            color: #60a5fa;
+            margin-bottom: 8px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+        .mode-switcher {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .btn-toggle {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 15px;
+        }
+        .btn-toggle:hover {
+            background-color: var(--primary-hover);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        @media (min-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+        .box {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-label);
+            text-align: right;
+        }
+        .wrapper {
+            position: relative;
+            width: 100%;
+            height: 220px;
+        }
+        .editor-area {
+            width: 100%;
+            height: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 28px;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            text-align: right;
+            resize: none;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .secret-display-layer {
+            font-family: 'MaPoliceMasquee', sans-serif;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-color: var(--input-bg);
+            border-color: var(--border);
+            color: var(--text-main);
+            z-index: 2;
+            display: none;
+        }
+        .font-normal { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .read-only-box { background-color: #e2e8f0 !important; }
+        .btn-action {
+            margin-top: 10px;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+        }
+        .btn-action:hover { background-color: var(--primary-hover); }
+        .btn-clear { background-color: #ef4444; margin-top: 5px; }
+        .btn-clear:hover { background-color: #dc2626; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>مترجم الكتابة العرقمسيـــــة</h1>
+    
+    <div class="mode-switcher">
+        <button class="btn-toggle" id="modeBtn" onclick="toggleMode()">🔄 النمط الحالي: من العرقمسية إلى عربي عادي</button>
+    </div>
+    
+    <div class="grid">
+        <div class="box">
+            <label id="labelInput" for="mainInput">خط العرقمسية:</label>
+            <div class="wrapper">
+                <textarea id="mainInput" class="editor-area" oninput="processTranslation()" onscroll="syncScroll()"></textarea>
+                <div id="layerDisplay" class="editor-area secret-display-layer"></div>
+            </div>
+            <button class="btn-action btn-clear" onclick="clearAll()">مسح الكل 🗑️</button>
+        </div>
+
+        <div class="box">
+            <label id="labelOutput" for="mainOutput">الترجمة (خط عربي عادي):</label>
+            <div class="wrapper">
+                <textarea id="mainOutput" class="editor-area read-only-box" readonly></textarea>
+                <div id="layerDisplayResult" class="editor-area secret-display-layer"></div>
+            </div>
+            <button class="btn-action" onclick="copyResult()">نسخ النتيجة 📋</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let isSecretToNormal = true; 
+
+    function toggleMode() {
+        isSecretToNormal = !isSecretToNormal;
+        const modeBtn = document.getElementById('modeBtn');
+        const labelInput = document.getElementById('labelInput');
+        const labelOutput = document.getElementById('labelOutput');
+        const mainInput = document.getElementById('mainInput');
+        const mainOutput = document.getElementById('mainOutput');
+        
+        clearAll();
+
+        if (isSecretToNormal) {
+            modeBtn.innerText = "🔄 النمط الحالي: من العرقمسية إلى عربي عادي";
+            labelInput.innerText = "خط العرقمسية:";
+            labelOutput.innerText = "الترجمة (خط عربي عادي):";
+            
+            mainInput.style.color = "transparent"; 
+            mainInput.style.caretColor = "var(--text-main)";
+            document.getElementById('layerDisplay').style.display = "block";
+            document.getElementById('layerDisplayResult').style.display = "none";
+        } else {
+            modeBtn.innerText = "🔄 النمط الحالي: من عربي عادي إلى العرقمسية (عكسي)";
+            labelInput.innerText = "اكتب هنا خط عربي عادي:";
+            labelOutput.innerText = "النتيجة بخط العرقمسية:";
+            
+            mainInput.style.color = "var(--text-main)"; 
+            document.getElementById('layerDisplay').style.display = "none";
+            document.getElementById('layerDisplayResult').style.display = "block";
+        }
+        processTranslation();
+    }
+
+    function applyShaddaProtection(text) {
+        let protectedText = text;
+        protectedText = protectedText.replace(/([\u0600-\u06FF])([\u064B-\u0650])\u0651/g, '$1$2\u200D\u0651');
+        protectedText = protectedText.replace(/([\u0600-\u06FF])\u0651([\u064B-\u0650])/g, '$1$2\u200D\u0651');
+        return protectedText;
+    }
+
+    function processTranslation() {
+        const inputArea = document.getElementById('mainInput');
+        const outputArea = document.getElementById('mainOutput');
+        const layerDisplay = document.getElementById('layerDisplay');
+        const layerDisplayResult = document.getElementById('layerDisplayResult');
+        
+        let rawText = inputArea.value;
+        outputArea.value = rawText;
+
+        if (isSecretToNormal) {
+            if(rawText === "") {
+                layerDisplay.innerText = "اكتب هنا بخط العرقمسية ...";
+                layerDisplay.style.color = "#94a3b8";
+            } else {
+                layerDisplay.innerText = applyShaddaProtection(rawText);
+                layerDisplay.style.color = "var(--text-main)";
+            }
+        } else {
+            if(rawText === "") {
+                layerDisplayResult.innerText = "ستظهر النتيجة بخط العرقمسية هنا...";
+                layerDisplayResult.style.color = "#94a3b8";
+            } else {
+                layerDisplayResult.innerText = applyShaddaProtection(rawText);
+                layerDisplayResult.style.color = "var(--text-main)";
+            }
+        }
+    }
+
+    function syncScroll() {
+        const inputArea = document.getElementById('mainInput');
+        const outputArea = document.getElementById('mainOutput');
+        if (isSecretToNormal) {
+            document.getElementById('layerDisplay').scrollTop = inputArea.scrollTop;
+        } else {
+            document.getElementById('layerDisplayResult').scrollTop = outputArea.scrollTop;
+        }
+    }
+
+    function clearAll() {
+        document.getElementById('mainInput').value = "";
+        document.getElementById('mainOutput').value = "";
+        processTranslation();
+    }
+
+    function copyResult() {
+        let textToCopy = document.getElementById('mainOutput').value;
+        navigator.clipboard.writeText(textToCopy);
+        
+        const btn = document.querySelector('.btn-action:not(.btn-clear)');
+        const originalText = btn.innerText;
+        btn.innerText = "تم النسخ! ✓";
+        setTimeout(() => btn.innerText = originalText, 2000);
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        isSecretToNormal = false;
+        toggleMode();
+    });
+</script>
+
+</body>
+</html>
